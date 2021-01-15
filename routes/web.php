@@ -14,9 +14,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Auth::routes();
+
+//Overrides standard method for logout, for logging out inside the vue spa
+Route::get('/logout', function () {
+    Auth::logout();
+    return Redirect::to('login');
+});
+
+//Overrides register name
+//[TODO] Redirect if first run already happened (middleware that checks if file exists)
+Route::get('firstrun', 'Auth\RegisterController@showRegistrationForm')->name('firstrun');
+Route::post('firstrun', 'Auth\RegisterController@register');
+
 Route::get('/{any}', 'AppController@index')
     ->where('any', '.*')
-    /* ->middleware('auth') */;
-
+    ->middleware('auth');
 
 Route::get('/home', 'HomeController@index')->name('home');

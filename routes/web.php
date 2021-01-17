@@ -13,21 +13,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Auth::routes();
+if (!file_exists(storage_path('installed.json'))) {
+    Route::middleware('firstrun')->group(function () {
+        Auth::routes();
+    });
+} else {
+    Auth::routes(["register" => false]);
+}
 
 //Overrides standard method for logout, for logging out inside the vue spa
-Route::get('/logout', function () {
-    Auth::logout();
-    return Redirect::to('login');
-});
+Route::get('/logout', 'Auth\LoginController@logout', redirect('login'))->name('logout');
 
 //Overrides register name
 //[TODO] Redirect if first run already happened (middleware that checks if file exists)
-Route::get('firstrun', 'Auth\RegisterController@showRegistrationForm')->name('firstrun');
-Route::post('firstrun', 'Auth\RegisterController@register');
+//Route::get('register', 'Auth\RegisterController@showRegistrationForm')->middleware('postrun')->name('register');
+//Route::post('firstrun', 'Auth\RegisterController@register');
 
 Route::get('/{any}', 'AppController@index')
     ->where('any', '.*')
     ->middleware('auth');
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/', 'HomeController@index')->name('home');

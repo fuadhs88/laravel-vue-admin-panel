@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/hello', function () {
+Route::middleware(['auth:api', 'role: "Super Admin"'])->get('/hello', function (Request $request) {
+    dd($request);
     return ["message" => "hello"];
 });
 

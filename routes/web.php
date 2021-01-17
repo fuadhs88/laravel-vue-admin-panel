@@ -24,13 +24,8 @@ if (!file_exists(storage_path('installed.json'))) {
 //Overrides standard method for logout, for logging out inside the vue spa
 Route::get('/logout', 'Auth\LoginController@logout', redirect('login'))->name('logout');
 
-//Overrides register name
-//[TODO] Redirect if first run already happened (middleware that checks if file exists)
-//Route::get('register', 'Auth\RegisterController@showRegistrationForm')->middleware('postrun')->name('register');
-//Route::post('firstrun', 'Auth\RegisterController@register');
-
 Route::get('/{any}', 'AppController@index')
-    ->where('any', '.*')
+    ->where('any', '^(?!api).*$')
     ->middleware('auth');
 
 Route::get('/', 'HomeController@index')->name('home');

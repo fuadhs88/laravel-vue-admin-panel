@@ -14,7 +14,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:api', 'role: "Super Admin"'])->get('/hello', function (Request $request) {
+Route::group([
+    'prefix' => 'auth'
+], function () {
+    Route::post('login', 'Api\AuthController@login');
+    Route::middleware("firstrun")->post('signup', 'Api\AuthController@signup');
+
+    // handle reset password form process
+    Route::post('reset-password', 'AuthController@sendPasswordResetLink');
+
+    Route::post('reset/password', 'AuthController@callResetPassword');
+
+    Route::get('installed', 'Api\AuthController@isInstalled');
+
+    Route::group([
+        'middleware' => 'auth:api'
+    ], function () {
+        Route::get('logout', 'Api\AuthController@logout');
+        Route::get('user', 'Api\AuthController@user');
+        Route::get('user/permissions', 'Api\AuthController@getAllPermissionsAttribute');
+    });
+});
+
+Route::middleware(['role: "Super Admin"'])->get('/hello', function (Request $request) {
     dd($request);
     return ["message" => "hello"];
 });

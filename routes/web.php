@@ -13,19 +13,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-if (!file_exists(storage_path('installed.json'))) {
+/* if (!file_exists(storage_path('installed.json'))) {
     Route::middleware('firstrun')->group(function () {
         Auth::routes();
     });
 } else {
     Auth::routes(["register" => false]);
-}
+} */
 
 //Overrides standard method for logout, for logging out inside the vue spa
-Route::get('/logout', 'Auth\LoginController@logout', redirect('login'))->name('logout');
+//Route::get('/logout', 'Auth\LoginController@logout', redirect('login'))->name('logout');
 
 Route::get('/{any}', 'AppController@index')
     ->where('any', '^(?!api).*$')
-    ->middleware('auth');
+    //->middleware('auth')
+;
 
 Route::get('/', 'HomeController@index')->name('home');

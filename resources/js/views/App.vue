@@ -1,24 +1,23 @@
 <template>
     <div>
-        <h1>{{ title }}</h1>
-
-        <p>
-            <router-link :to="{ name: 'home' }">Home</router-link> |
-            <router-link :to="{ name: 'about' }">About</router-link> |
-            <a href="/logout">Logout (non spa)</a>
-        </p>
-
+        <Navbar></Navbar>
         <div class="container">
             <router-view></router-view>
         </div>
     </div>
 </template>
 <script>
+import Navbar from "../components/Navbar";
+import { USER_REQUEST } from "../store/actions/user";
 export default {
-    data() {
-        return {
-            title: process.env.MIX_APP_NAME
-        };
+    name: "app",
+    components: {
+        Navbar
+    },
+    created: function() {
+        if (this.$store.getters.isAuthenticated) {
+            this.$store.dispatch(USER_REQUEST);
+        }
     }
 };
 </script>

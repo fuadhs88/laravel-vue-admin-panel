@@ -1,0 +1,154 @@
+/**
+ * First we will load all of this project's JavaScript dependencies which
+ * includes Vue and other libraries. It is a great starting point when
+ * building robust, powerful web applications using Vue and Laravel.
+ */
+
+require("./bootstrap");
+
+import Vue from "vue";
+import VueRouter from "vue-router";
+import Vuex from "vuex";
+
+Vue.use(VueRouter);
+Vue.use(Vuex);
+import App from "./views/App";
+import Home from "./views/Home";
+import About from "./views/About";
+import Login from "./views/Login";
+
+const store = new Vuex.Store({
+    state: {
+        token: localStorage.getItem("user-token") || "",
+        status: "",
+        installed: ""
+    },
+    getters: {
+        isAuthenticated: state => !!state.token,
+        authStatus: state => state.status,
+        isInstalled: state => installed
+    },
+    actions: {
+        [AUTH_REQUEST]: ({ commit, dispatch }, user) => {
+            return new Promise((resolve, reject) => {
+                commit(AUTH_REQUEST);
+                axios({ url: "api/auth/login", data: user, method: "POST" })
+                    .then(resp => {
+                        const token = "Bearer " + resp.data.token;
+                        localStorage.setItem("user-token", token);
+                        axios.defaults.headers.common["Authorization"] = token;
+                        commit(AUTH_SUCCESS, token);
+                        dispatch(USER_REQUEST);
+                        resolve(resp);
+                    })
+                    .catch(err => {
+                        commit(AUTH_ERROR, err);
+                        localStorage.removeItem("user-token");
+                        reject(err);
+                    });
+            });
+        },
+        [AUTH_LOGOUT]: ({ commit, dispatch }) => {
+            return new Promise((resolve, reject) => {
+                commit(AUTH_LOGOUT);
+                axios({
+                    url: "api/auth/logout",
+                    data: user,
+                    method: "POST"
+                }).catch(() => {});
+                localStorage.removeItem("user-token");
+                // remove the axios default header
+                delete axios.defaults.headers.common["Authorization"];
+                resolve();
+            });
+        }
+    },
+    mutations: {
+        [AUTH_REQUEST]: state => {
+            state.status = "loading";
+        },
+        [AUTH_SUCCESS]: (state, token) => {
+            state.status = "success";
+            state.token = token;
+        },
+        [AUTH_ERROR]: state => {
+            state.status = "error";
+        }
+    }
+});
+
+const ifNotAuthenticated = (to, from, next) => {
+    if (!store.getters.isAuthenticated) {
+        next();
+        return;
+    }
+    next("/login");
+};
+
+const ifAuthenticated = (to, from, next) => {
+    if (store.getters.isAuthenticated) {
+        next();
+        return;
+    }
+};
+
+const ifInstalled = (to, from, next) => {
+    if (store.getters.isInstalled) {
+    }
+};
+
+const routes = [
+    {
+        path: "/",
+        name: "home",
+        component: Home,
+        beforeEnter: ifAuthenticated
+    },
+    {
+        path: "/about",
+        name: "about",
+        component: About,
+        beforeEnter: ifAuthenticated
+    },
+    {
+        path: "/register",
+        name: "register",
+        beforeEnter: ifInstalled
+    },
+    {
+        path: "/login",
+        name: "login",
+        component: Login,
+        beforeEnter: ifNotAuthenticated
+    }
+];
+
+const router = new VueRouter({
+    routes: routes,
+    mode: "history"
+});
+
+/* router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem("user-token");
+    if (to.fullPath !== "/login") {
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = token;
+        }
+        axios
+            .get("/api/auth/user")
+            .catch(e => {
+                next("/login");
+            })
+            .then(response => {
+                next();
+            });
+    } else {
+        next();
+    }
+}); */
+
+const app = new Vue({
+    el: "#app",
+    components: { App },
+    router
+});

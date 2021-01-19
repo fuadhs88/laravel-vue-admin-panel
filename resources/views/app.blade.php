@@ -7,13 +7,19 @@
 
     <title>Admin panel</title>
     <style href="{{ asset('css/app.css') }}"></style>
+    <script>
+        window.Laravel = <?php echo json_encode([
+                                'csrfToken' => csrf_token(),
+                            ]); ?>
+    </script>
 </head>
 
 <body>
     <div id="app">
-        <app></app>
+
     </div>
-    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}">
+    </script>
 </body>
 
 </html>

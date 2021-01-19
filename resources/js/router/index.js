@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
+import multiguard from "vue-router-multiguard";
 import Home from "../views/Home";
 import About from "../views/About";
 import Login from "../views/Login";
@@ -25,33 +26,25 @@ const ifAuthenticated = (to, from, next) => {
 };
 
 const ifNotInstalled = (to, from, next) => {
-    if (!store.getters.isAuthenticated) {
-        store.dispatch(IS_SETUP).then(() => {
-            if (store.getters.isInstalled == false) {
-                next();
-                return;
-            } else {
-                next("/login");
-            }
-        });
-    } else {
-        next("/");
-    }
+    store.dispatch(IS_SETUP).then(() => {
+        if (!store.getters.isInstalled) {
+            next();
+            return;
+        } else {
+            next("/login");
+        }
+    });
 };
 
 const ifInstalled = (to, from, next) => {
-    if (!store.getters.isAuthenticated) {
-        store.dispatch(IS_SETUP).then(() => {
-            if (store.getters.isInstalled == true) {
-                next();
-                return;
-            } else {
-                next("/setup");
-            }
-        });
-    } else {
-        next("/");
-    }
+    store.dispatch(IS_SETUP).then(() => {
+        if (store.getters.isInstalled) {
+            next();
+            return;
+        } else {
+            next("/setup");
+        }
+    });
 };
 
 export default new Router({
@@ -73,13 +66,13 @@ export default new Router({
             path: "/login",
             name: "Login",
             component: Login,
-            beforeEnter: ifInstalled
+            beforeEnter: multiguard([ifNotAuthenticated, ifInstalled])
         },
         {
             path: "/setup",
             name: "Setup",
             component: Setup,
-            beforeEnter: ifNotInstalled
+            beforeEnter: multiguard([ifNotAuthenticated, ifNotInstalled])
         }
     ]
 });

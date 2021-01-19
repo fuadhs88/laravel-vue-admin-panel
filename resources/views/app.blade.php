@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <title>Admin panel</title>
-    <style href="{{ asset('css/app.css') }}"></style>
+    <!-- <style href="{{ asset('css/app.css') }}"></style> -->
     <script>
         window.Laravel = <?php echo json_encode([
                                 'csrfToken' => csrf_token(),

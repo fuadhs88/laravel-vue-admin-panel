@@ -1,2 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Nunito);@import url(/node_modules/bootstrap-italia/dist/bootstrap-italia.min.css);
+.navbar-dark .navbar-nav .nav-link {
+  color: #ffffff;
+}
 

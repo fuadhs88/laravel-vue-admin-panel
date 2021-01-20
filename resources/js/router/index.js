@@ -5,6 +5,7 @@ import Home from "../views/Home";
 import About from "../views/About";
 import Login from "../views/Login";
 import Setup from "../views/Setup";
+import Account from "../views/Account";
 import store from "../store";
 import { IS_SETUP } from "../store/actions/auth";
 Vue.use(Router);
@@ -73,6 +74,12 @@ export default new Router({
             name: "Setup",
             component: Setup,
             beforeEnter: multiguard([ifNotAuthenticated, ifNotInstalled])
+        },
+        {
+            path: "/account",
+            name: "Account",
+            component: Account,
+            beforeEnter: ifAuthenticated
         }
     ]
 });

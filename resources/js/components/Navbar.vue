@@ -25,15 +25,9 @@
         </b-navbar>
     </div>
 </template>
-<style>
-.navbar-dark .navbar-nav .nav-link {
-    color: #ffffff;
-}
-</style>
 <script>
 import { mapGetters, mapState } from "vuex";
 import { AUTH_LOGOUT } from "../store/actions/auth";
-import { NavbarPlugin } from "bootstrap-vue";
 export default {
     name: "Navbar",
     methods: {
@@ -44,7 +38,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(["getProfile", "isAuthenticated", "isProfileLoaded"]),
+        ...mapGetters(["isAuthenticated", "isProfileLoaded"]),
         ...mapState({
             authLoading: state => state.auth.status === "loading",
             name: state =>

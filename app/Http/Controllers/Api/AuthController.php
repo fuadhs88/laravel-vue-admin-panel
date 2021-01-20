@@ -152,20 +152,21 @@ class AuthController extends Controller
     {
         $profile = $request->user();
         $role = isset($profile->getRoleNames()[0]) ? $profile->getRoleNames()[0] : "";
-        $profile->setAttribute("role", $role);
+        $role_id = !empty($role) ? Role::findByName($role)->id : "";
         //$profile->title = $request->getRoleNames()[0];
         return response()->json([
             "id" => $profile["id"],
             "created_at" => $profile["created_at"],
             "name" => $profile["name"],
             "email" => $profile["email"],
-            "role" => $profile["role"]
+            "role_id" => $role,
+            "role" => $role_id
         ]);
     }
     public function getAllPermissionsAttribute(Request $request)
     {
-        $profile = $request->user();
-        $role = isset($profile->getRoleNames()[0]) ? $profile->getRoleNames()[0] : "";
+        $user = $request->user();
+        $role = isset($user->getRoleNames()[0]) ? $user->getRoleNames()[0] : "";
         $isEmpty = empty($role);
         $permissions = !$isEmpty ? Role::findByName($role)->permissions : [];
         if (!$isEmpty) {

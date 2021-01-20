@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\AuthorizationException;
+
 
 class Handler extends ExceptionHandler
 {
@@ -52,7 +55,13 @@ class Handler extends ExceptionHandler
     {
         if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
             return  response()->json(['header' => 'Your session has expired.', 'message' => 'Please refresh the page and try again.'], 500);
+        } else if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+            return response()->json([
+                'responseMessage' => 'You do not have required authorization.',
+                'responseStatus'  => 403,
+            ]);
         }
+
         return parent::render($request, $exception);
     }
 }

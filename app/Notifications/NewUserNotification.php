@@ -13,14 +13,16 @@ class NewUserNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected $user;
+    protected $password;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, String $password)
     {
         $this->user = $user;
+        $this->password = $password;
     }
 
     /**
@@ -44,7 +46,7 @@ class NewUserNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->from('no-reply@adminpanel.it', 'Your account has been created!')
-            ->view('email.created', ['user' => $this->user]);
+            ->view('email.created', ['user' => $this->user, "password" => $this->password]);
     }
 
     public function toArray($notifiable)

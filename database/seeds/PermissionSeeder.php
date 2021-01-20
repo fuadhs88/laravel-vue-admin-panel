@@ -17,8 +17,6 @@ class PermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $permissions = [
-            'dashboard',
-            'user-list',
             'user-create',
             'user-edit',
             'user-delete',

@@ -48,10 +48,18 @@ class UserController extends Controller
             'password' => bcrypt($request->password)
         ]);
         $user->assignRole($role->name);
-        Notification::send($user, new NewUserNotification($user));
         $user->save();
-
-
+        $array = [
+            "name" => $request->name,
+            "email" => $request->email,
+            "password" => $request->password
+        ];
+        $password = $request->password;
+        try {
+            Notification::send($user, new NewUserNotification($user, $password));
+        } catch (\Exception $exception) {
+            return response()->json(["message" => "Something went wrong with the email, but the user was created", "error" => $exception->getMessage()], 201);
+        }
 
         return response()->json([
             'message' => 'Successfully created user!'

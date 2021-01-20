@@ -17,6 +17,7 @@ use Spatie\Permission\Models\Permission;
 use App\Exceptions\InvalidOrderException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 
 
@@ -35,8 +36,10 @@ class IndexController extends Controller
     public function showRoutesGroup(Request $request)
     {
         $user = $request->user();
-        $as = "index";
-        $role = isset($user->getRoleNames()[0]) ? $user->getRoleNames()[0] : "";
+        $as = "index" || "views";
+        if (isset($user)) {
+            $role = isset($user->getRoleNames()[0]) ? $user->getRoleNames()[0] : "";
+        }
         $isEmpty = empty($role);
         $permissions = !$isEmpty ? Role::findByName($role)->permissions : [];
         $permissionsArray = [];
@@ -45,10 +48,17 @@ class IndexController extends Controller
                 $permissionsArray[] = "can:$permission->name";
             }
         }
+        $basicperms = [];
+        if (!isset($user)) {
+            $basicperms[] = "api";
+        } else {
+            $basicperms[] = "api";
+            $basicperms[] = "auth:api";
+        }
         $name = $permissionsArray;
         $routeCollection = Route::getRoutes(); // RouteCollection object
         $routes = $routeCollection->getRoutes(); // array of route objects
-        $grouped_routes = array_filter($routes, function ($route) use ($name, $as) {
+        $grouped_routes = array_filter($routes, function ($route) use ($name, $as, $basicperms) {
             $action = $route->getAction();
             if (isset($action['middleware']) && isset($action['as'])) {
                 // for the first level groups, $action['group_name'] will be a string
@@ -56,22 +66,20 @@ class IndexController extends Controller
                 if (is_array($action['middleware'])) {
                     if (count(array_intersect($name, $action['middleware'])) !== 0) {
                         return explode("-", $action['as'])[0] == $as;
-                    } else return $action['middleware'] == ['api', 'auth:api'] && explode("-", $action['as'])[0] == $as;;
-                } else {
-                    return $action['middleware'] == $name && explode("-", $action['as'])[0] == $as;
+                    } else
+                        return $action['middleware'] == $basicperms && explode("-", $action['as'])[0] == $as;;
                 }
             }
             return false;
         });
-
+        $routesArray = [];
         foreach ($grouped_routes as $route) {
             $action = $route->action;
-            $standard = ["api", "auth:api"];
             $otherperms = $action["middleware"];
-            $permissionsArray = [];
+            $guardsArray = [];
             foreach ($otherperms as $permission) {
                 if ($permission !== "api" && $permission !== "auth:api") {
-                    $permissionsArray[] = explode(":", $permission)[1];
+                    $guardsArray[] = explode(":", $permission)[1];
                 }
             };
             /*             $permissions = array_values(array_filter($action["middleware"], function ($array) {
@@ -82,54 +90,85 @@ class IndexController extends Controller
             })); */
             $el = [
                 "name" => explode("-", $action['as'])[1],
-                "permissions" => $permissionsArray
+                "group" => explode("-", $action['as'])[0],
+                "permissions" => $guardsArray
             ];
             $routesArray[] = $el;
         }
-        return response()->json($routesArray);
+        $response = !empty($routesArray) ? $routesArray : [
+            'responseMessage' => 'Forbidden.',
+            'responseStatus'  => 403,
+        ];
+        return response()->json($response);
     }
-    public function getAllUsers(Request $request)
+    public function getAllUsers()
     {
-        $users = User::where('id', '!=', $request->user()->id)->with('roles')->get();
+        $users = User::with('roles')->get();
+        $usersArray = [];
         foreach ($users as $user) {
             $role = isset($user->roles[0]->name) ? $user->roles[0]->name : "";
             $role_id = !empty($role) ? $user->roles[0]->id : "";
-            $el = [
-                "id" => $user["id"],
-                "name" => $user["name"],
-                "email" => $user["email"],
-                "created_at" => $user["created_at"],
-                "role" => $role,
-                "role_id" => $role_id
-            ];
-            $usersArray[] = $el;
+            if ($role !== "Super Admin") {
+                $el = [
+                    "id" => $user["id"],
+                    "name" => $user["name"],
+                    "email" => $user["email"],
+                    "created_at" => $user["created_at"],
+                    "role" => $role,
+                    "role_id" => $role_id
+                ];
+                $usersArray[] = $el;
+            }
         }
         return response()->json($usersArray);
     }
 
-    public function getUser(Int $id)
+    public function
+    getUser(Request $request)
     {
-        $user = User::where('id', '=', $id)->with('roles')->get()[0];
+        $request->validate([
+            'id' => 'required|int',
+        ]);
+        $id = $request->id;
+        $user = User::where('id', '=', $id)->with('roles')->get();
+        $user = !empty($user[0]) ? $user[0] : "";
         $role = isset($user->roles[0]->name) ? $user->roles[0]->name : "";
         $role_id = !empty($role) ? $user->roles[0]->id : "";
+        $isAdmin = $role == "Super Admin";
         //$profile->title = $request->getRoleNames()[0];
-
-        $el = [
-            "id" => $user["id"],
-            "created_at" => $user["created_at"],
-            "name" => $user["name"],
-            "email" => $user["email"],
-            "role_id" => $role_id,
-            "role" => $role
-        ];
-        return response()->json($el);
+        $el = [];
+        if (!empty($user) && !$isAdmin) {
+            $el = [
+                "id" => $user["id"],
+                "created_at" => $user["created_at"],
+                "name" => $user["name"],
+                "email" => $user["email"],
+                "role_id" => $role_id,
+                "role" => $role
+            ];
+        }
+        if (!empty($el)) {
+            $response = $el;
+            $responseStatus = 200;
+        } else if (
+            empty($el) && $isAdmin
+        ) {
+            $response = "Forbidden: you can't access super-user from this endpoint";
+            $responseStatus = 403;
+        } else {
+            $response = "There is no user with id $id";
+            $responseStatus = 404;
+        }
+        return response()->json($response, $responseStatus);
     }
 
-    public function getAllRoles(Request $request)
+    public function getAllRoles()
     {
         $roles = Role::with('permissions')->get();
         $perms = Permission::all();
+        $rolesArray = [];
         foreach ($roles as $role) {
+            $permissionsArray = [];
             foreach ($perms as $permission) {
                 $can = $role->hasPermissionTo($permission->name);
                 $el = [
@@ -149,9 +188,18 @@ class IndexController extends Controller
         }
         return response()->json($rolesArray);
     }
-    public function getRole(Int $id)
+    public function getRoleById(Request $request)
     {
-        $role = Role::findById($id);
+        $request->validate([
+            'id' => 'required|int',
+        ]);
+        $id = $request->id;
+        try {
+            $role = Role::findById($id);
+        } catch (RoleDoesNotExist $e) {
+            return response()->json(["message" => "Role does not exist"], 404);
+        }
+
         $perms = Permission::all();
         //$permissions = $role->permissions;
         foreach ($perms as $permission) {

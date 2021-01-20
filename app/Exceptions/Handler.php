@@ -6,7 +6,9 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\AuthorizationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use TypeError;
 
 class Handler extends ExceptionHandler
 {
@@ -53,13 +55,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            return  response()->json(['message' => 'Invalid route'], 404);
+        } else if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
             return  response()->json(['header' => 'Your session has expired.', 'message' => 'Please refresh the page and try again.'], 500);
         } else if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
-            return response()->json([
-                'responseMessage' => 'You do not have required authorization.',
-                'responseStatus'  => 403,
-            ]);
+            return response()->json(["message" => "You do not have the required permissions."], 403);
+        } else if ($exception instanceof TypeError) {
+            return response()->json(["message" => "You have passed an argument with an incorrect type"], 400);
         }
 
         return parent::render($request, $exception);

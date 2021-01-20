@@ -15,40 +15,28 @@ use Illuminate\Support\Facades\Route;
 */
 
 
+Route::get('routes', 'Api\IndexController@showRoutesGroup');
+
+//Testing role middleware
+Route::middleware(['auth:api', 'role:Super Admin'])->get('/hello', function () {
+    return response()->json(["message" => "hello"]);
+});
 
 Route::group([
     'prefix' => 'auth'
 ], function () {
-    Route::post('login', 'Api\AuthController@login');
     Route::middleware("firstrun")->post('signup', 'Api\AuthController@signup');
 
-    // handle reset password form process
-    Route::post('reset-password', 'AuthController@sendPasswordResetLink');
-
-    Route::post('reset/password', 'AuthController@callResetPassword');
+    Route::post('login', 'Api\AuthController@login');
 
     Route::get('installed', 'Api\AuthController@isInstalled');
 
     Route::group([
         'middleware' => 'auth:api'
     ], function () {
-        Route::get('routes', 'Api\IndexController@showRoutes');
         Route::get('logout', 'Api\AuthController@logout');
-        Route::get('user/permissions', 'Api\AuthController@getAllPermissionsAttribute');
     });
 });
-
-Route::group(
-    [
-        'middleware' => 'auth:api'
-    ],
-    function () {
-        Route::get('user', 'Api\AuthController@user');
-        Route::get('user/permissions', 'Api\AuthController@getAllPermissionsAttribute');
-    }
-);
-
-Route::get('routetest', 'Api\IndexController@showRoutesGroup');
 
 Route::group(
     [
@@ -56,41 +44,47 @@ Route::group(
         'middleware' => 'auth:api'
     ],
     function () {
-        Route::name('dashboard')->middleware(["can:dashboard"])->get('/dashboard', 'Api\IndexController@getDashboard');
-        Route::name('users')->middleware(["can:user-list"])->get('/users', 'Api\IndexController@getAllUsers');
+        //Route::name('dashboard')->get('/dashboard', 'Api\IndexController@getDashboard');
+        Route::name('users')->get('/users', 'Api\IndexController@getAllUsers');
         Route::name('roles')->middleware(["can:role-list"])->get('/roles', 'Api\IndexController@getAllRoles');
         Route::name('permissions')->middleware(["can:perm-list"])->get('/permissions', 'Api\IndexController@getPermissions');
+    }
+);
+
+Route::group(
+    [
+        'as' => 'views-',
+        'middleware' => 'auth:api'
+    ],
+    function () {
         Route::name('account')->get('account', 'Api\AuthController@user');
+        Route::name('user')->get('user', 'Api\IndexController@getUser');
+        Route::name('role')->middleware(["can:role-list"])->get('role', 'Api\IndexController@getRoleById');
     }
 );
 
+Route::middleware(["auth:api"])->get('account/permissions', 'Api\AuthController@getAllPermissionsAttribute');
+
 Route::group(
     [
-        'prefix' => 'users',
+        'prefix' => 'user',
         'middleware' => 'auth:api'
     ],
     function () {
-        Route::middleware(["can:user-list"])->get('/users/{id}', 'Api\IndexController@getUser');
         Route::middleware(["can:user-create"])->post('create', 'Api\UserController@createUser');
-        Route::middleware(["can:user-edit"])->put('{id}/edit', 'Api\UserController@editUser');
-        Route::middleware(["can:user-delete"])->delete('{id}/delete', 'Api\UserController@deleteUser');
+        Route::middleware(["can:user-edit"])->put('edit', 'Api\UserController@editUser');
+        Route::middleware(["can:user-delete"])->delete('delete', 'Api\UserController@deleteUser');
     }
 );
 
 Route::group(
     [
-        'prefix' => 'roles',
+        'prefix' => 'role',
         'middleware' => 'auth:api'
     ],
     function () {
-        Route::middleware(["can:role-list"])->get('/{id}', 'Api\IndexController@getRole');
         Route::middleware(["can:role-create"])->post('create', 'Api\RoleController@createRole');
-        Route::middleware(["can:role-edit"])->put('{id}/edit', 'Api\RoleController@editRole');
-        Route::middleware(["can:role-delete"])->delete('{id}/delete', 'Api\RoleController@deleteRole');
+        Route::middleware(["can:role-edit"])->put('edit', 'Api\RoleController@editRole');
+        Route::middleware(["can:role-delete"])->delete('delete', 'Api\RoleController@deleteRole');
     }
 );
-
-Route::middleware(['role: "Super Admin"'])->get('/hello', function (Request $request) {
-    dd($request);
-    return ["message" => "hello"];
-});

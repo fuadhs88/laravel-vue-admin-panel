@@ -159,8 +159,8 @@ class AuthController extends Controller
             "created_at" => $profile["created_at"],
             "name" => $profile["name"],
             "email" => $profile["email"],
-            "role_id" => $role,
-            "role" => $role_id
+            "role_id" => $role_id,
+            "role" => $role
         ]);
     }
     public function getAllPermissionsAttribute(Request $request)

@@ -15,3 +15,4 @@
 * `php artisan queue:work`
 
 (Se usi una porta diversa da 8000 cambiare la variable port sulla collection postman)
+(Se vuoi resettare il processo di setup ricorda di cancellare il file installed.json su storage)

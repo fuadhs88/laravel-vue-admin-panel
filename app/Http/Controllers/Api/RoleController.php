@@ -54,12 +54,8 @@ class RoleController extends Controller
         ], 402);
     }
 
-    public function deleteRole(Request $request)
+    public function deleteRole(Request $request, Int $id)
     {
-        $request->validate([
-            'id' => 'required|int'
-        ]);
-        $id = $request->id;
         try {
             $role = Role::findById($id);
         } catch (RoleDoesNotExist $exception) {

@@ -7,6 +7,7 @@ import Login from "../views/Login";
 import Setup from "../views/Setup";
 import Account from "../views/Account";
 import store from "../store";
+import PageNotFound from "../views/PageNotFound";
 import { IS_SETUP } from "../store/actions/auth";
 Vue.use(Router);
 
@@ -47,6 +48,10 @@ const ifInstalled = (to, from, next) => {
         }
     });
 };
+
+//mode: history gives some problems with dynamic routes used in conjunction with 404 page/redir
+//mode: hash works fine but the hashbang is really ugly
+//mode: abstract, well, removes the problem, but now each time i reload is just the default page, maybe i can do something with the state?
 
 export default new Router({
     mode: "history",

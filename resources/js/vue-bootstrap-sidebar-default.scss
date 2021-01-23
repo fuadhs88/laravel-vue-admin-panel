@@ -17,27 +17,6 @@
         background-color: $bg-color;
     }
 
-    .list-group-item {
-        padding: 0 !important;
-
-        .sidebar-menu-item {
-            background-color: $bg-color;
-            color: $color;
-            border: none;
-
-            &:hover {
-                background-color: #f7f7f7;
-            }
-
-            &:focus,
-            &:active {
-                outline: none !important;
-                box-shadow: none !important;
-                background-color: $bg-color;
-            }
-        }
-    }
-
     .sidebar-button {
         background-color: $transparent-background;
         color: $color;

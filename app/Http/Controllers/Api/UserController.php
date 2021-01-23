@@ -47,7 +47,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password)
         ]);
-        $user->assignRole($role->name);
+        $user->syncRoles([$role->name]);
         $user->save();
         $array = [
             "name" => $request->name,
@@ -66,12 +66,8 @@ class UserController extends Controller
         ], 201);
     }
 
-    public function deleteUser(Request $request)
+    public function deleteUser(Request $request, Int $id)
     {
-        $request->validate([
-            'id' => 'required|int',
-        ]);
-        $id = $request->id;
         $user = User::find($id);
         if (empty($user)) {
             return response()->json(["message" => "You must provide an existing user"], 400);
@@ -121,7 +117,7 @@ class UserController extends Controller
             if ($role->name == "Super Admin") {
                 return response()->json(["message" => "Can't assign role Super Admin to another user"], 403);
             }
-            $userEdit['role'] = $request->input('role');
+            $user->syncRoles([$request->input('role')]);
         }
 
         if ($request->filled('password')) {

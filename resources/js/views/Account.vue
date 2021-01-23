@@ -45,7 +45,7 @@
                             >
                         </b-modal>
                         <b-button
-                            v-can="'user-delete'"
+                            v-can="'self-delete'"
                             type="submit"
                             variant="danger"
                             class="mt-3"

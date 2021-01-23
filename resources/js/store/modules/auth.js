@@ -9,6 +9,9 @@ import {
     IS_SETUP
 } from "../actions/auth";
 import { USER_REQUEST } from "../actions/user";
+import { ROUTE_REQUEST } from "../actions/routes";
+import router from "../../router";
+
 const state = {
     token: localStorage.getItem("user-token") || "",
     status: "",
@@ -33,6 +36,7 @@ const actions = {
                     axios.defaults.headers.common["Authorization"] = token;
                     commit(AUTH_SUCCESS, token);
                     dispatch(USER_REQUEST);
+                    dispatch(ROUTE_REQUEST);
                     resolve(token);
                 })
                 .catch(err => {
@@ -42,9 +46,10 @@ const actions = {
                 });
         });
     },
-    [AUTH_LOGOUT]: ({ commit }) => {
+    [AUTH_LOGOUT]: ({ commit, dispatch }) => {
         return new Promise(resolve => {
             commit(AUTH_LOGOUT);
+            //router.push("/login");
             axios({ url: "/api/auth/logout", method: "GET" });
             localStorage.removeItem("user-token");
             delete axios.defaults.headers.common["Authorization"];
@@ -102,7 +107,7 @@ const mutations = {
         state.status = "";
     },
     [IS_SETUP]: (state, resp) => {
-        state.isInstalled = Boolean(resp);
+        state.isInstalled = resp;
     }
 };
 

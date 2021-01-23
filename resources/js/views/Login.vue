@@ -1,6 +1,14 @@
 <template>
     <b-row align-v="center" align-h="center">
         <b-col sm="12" md="8" lg="6" style="max-width:50rem">
+            <b-alert
+                v-if="authStatus && error"
+                show
+                variant="warning"
+                dismissible
+            >
+                {{ error }}
+            </b-alert>
             <b-card>
                 <b-form @submit.prevent="login">
                     <b-form-group
@@ -49,6 +57,7 @@
 
 <script>
 import { AUTH_REQUEST } from "../store/actions/auth";
+import { mapState, mapGetters } from "vuex";
 
 export default {
     name: "Login",
@@ -56,7 +65,8 @@ export default {
         return {
             email: "",
             password: "",
-            remember_me: false
+            remember_me: false,
+            error: false
         };
     },
     methods: {
@@ -66,8 +76,18 @@ export default {
                 .dispatch(AUTH_REQUEST, { email, password, remember_me })
                 .then(() => {
                     this.$router.push("/");
+                })
+                .catch(e => {
+                    this.$set(
+                        this,
+                        ["error"],
+                        "Incorrect email or password, please check again"
+                    );
                 });
         }
+    },
+    computed: {
+        ...mapGetters(["authStatus"])
     }
 };
 </script>

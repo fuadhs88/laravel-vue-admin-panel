@@ -20,8 +20,9 @@ const actions = {
         commit(USER_REQUEST);
         const userToken = localStorage.getItem("user-token");
         axios.defaults.headers.common["Authorization"] = userToken;
-        axios({ url: "api/account", method: "GET" })
+        axios({ url: "/api/account", method: "GET" })
             .then(resp => {
+                console.log(resp);
                 dispatch(USER_PERMISSIONS);
                 commit(USER_SUCCESS, resp);
             })
@@ -32,9 +33,10 @@ const actions = {
             });
     },
     [USER_PERMISSIONS]: ({ commit }) => {
+        console.log("hi");
         const userToken = localStorage.getItem("user-token");
         axios.defaults.headers.common["Authorization"] = userToken;
-        axios({ url: "api/account/permissions", method: "GET" })
+        axios({ url: "/api/account/permissions", method: "GET" })
             .then(resp => {
                 commit(USER_PERMISSIONS, resp);
             })

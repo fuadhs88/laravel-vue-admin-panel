@@ -35,7 +35,7 @@ class IndexController extends Controller
     }
     public function showRoutesGroup(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user('api');
         $as = "index" || "views";
         if (isset($user)) {
             $role = isset($user->getRoleNames()[0]) ? $user->getRoleNames()[0] : "";
@@ -91,15 +91,15 @@ class IndexController extends Controller
             $el = [
                 "name" => explode("-", $action['as'])[1],
                 "group" => explode("-", $action['as'])[0],
+                "uri" => $route->uri,
                 "permissions" => $guardsArray
             ];
             $routesArray[] = $el;
         }
-        $response = !empty($routesArray) ? $routesArray : [
-            'responseMessage' => 'Forbidden.',
-            'responseStatus'  => 403,
-        ];
-        return response()->json($response);
+        if (empty($routesArray)) {
+            return response()->json([]);
+        };
+        return response()->json($routesArray);
     }
     public function getAllUsers()
     {
@@ -111,7 +111,7 @@ class IndexController extends Controller
             if ($role !== "Super Admin") {
                 $el = [
                     "id" => $user["id"],
-                    "name" => $user["name"],
+                    "user_name" => $user["name"],
                     "email" => $user["email"],
                     "created_at" => $user["created_at"],
                     "role" => $role,
@@ -123,16 +123,13 @@ class IndexController extends Controller
         return response()->json($usersArray);
     }
 
-    public function
-    getUser(Request $request)
+    public function getUser(Request $request, Int $id)
     {
-        $request->validate([
-            'id' => 'required|int',
-        ]);
-        $id = $request->id;
-        $user = User::where('id', '=', $id)->with('roles')->get();
+        $user = User::where('id', '=', $id)->with('roles')->with('permissions')->get();
         $user = !empty($user[0]) ? $user[0] : "";
         $role = isset($user->roles[0]->name) ? $user->roles[0]->name : "";
+        $isEmpty = empty($role);
+        $permissions = !$isEmpty ? Role::findByName($role)->permissions : [];
         $role_id = !empty($role) ? $user->roles[0]->id : "";
         $isAdmin = $role == "Super Admin";
         //$profile->title = $request->getRoleNames()[0];
@@ -144,7 +141,8 @@ class IndexController extends Controller
                 "name" => $user["name"],
                 "email" => $user["email"],
                 "role_id" => $role_id,
-                "role" => $role
+                "role" => $role,
+                "permissions" => $permissions
             ];
         }
         if (!empty($el)) {
@@ -180,7 +178,7 @@ class IndexController extends Controller
             }
             $el = [
                 "id" => $role["id"],
-                "name" => $role["name"],
+                "role_name" => $role["name"],
                 "created_at" => $role["created_at"],
                 "permissions" => $permissionsArray
             ];
@@ -188,12 +186,8 @@ class IndexController extends Controller
         }
         return response()->json($rolesArray);
     }
-    public function getRoleById(Request $request)
+    public function getRoleById(Request $request, Int $id)
     {
-        $request->validate([
-            'id' => 'required|int',
-        ]);
-        $id = $request->id;
         try {
             $role = Role::findById($id);
         } catch (RoleDoesNotExist $e) {
@@ -226,7 +220,7 @@ class IndexController extends Controller
         foreach ($perms as $permission) {
             $el = [
                 "id" => $permission["id"],
-                "name" => $permission["name"],
+                "permission_name" => $permission["name"],
             ];
             $permissionsArray[] = $el;
         }

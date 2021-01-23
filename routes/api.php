@@ -58,8 +58,8 @@ Route::group(
     ],
     function () {
         Route::name('account')->get('account', 'Api\AuthController@user');
-        Route::name('user')->get('user', 'Api\IndexController@getUser');
-        Route::name('role')->middleware(["can:role-list"])->get('role', 'Api\IndexController@getRoleById');
+        Route::name('user')->get('user/{id}', 'Api\IndexController@getUser');
+        Route::name('role')->middleware(["can:role-list"])->get('role/{id}', 'Api\IndexController@getRoleById');
     }
 );
 
@@ -73,7 +73,7 @@ Route::group(
     function () {
         Route::middleware(["can:user-create"])->post('create', 'Api\UserController@createUser');
         Route::middleware(["can:user-edit"])->put('edit', 'Api\UserController@editUser');
-        Route::middleware(["can:user-delete"])->delete('delete', 'Api\UserController@deleteUser');
+        Route::middleware(["can:user-delete"])->delete('delete/{id}', 'Api\UserController@deleteUser');
     }
 );
 

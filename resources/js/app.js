@@ -1,7 +1,7 @@
 require("./bootstrap");
 
 import Vue from "vue";
-import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
+import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue";
 //import VueRouter from "vue-router";
 import App from "./views/App";
 import router from "./router";
@@ -13,7 +13,7 @@ import "./app.scss";
 import moment from "moment";
 import { mapState } from "vuex";
 
-Vue.use(BootstrapVue, IconsPlugin);
+Vue.use(BootstrapVue, BootstrapVueIcons);
 
 Vue.directive("can", function(el, binding, vnode) {
     const store = vnode.context.$store;

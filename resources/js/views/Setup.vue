@@ -1,39 +1,70 @@
 <template>
-    <div>
-        <form class="login" @submit.prevent="login">
-            <h1>Sign in</h1>
-            <label>Name</label>
-            <input
-                required
-                v-model="name"
-                type="text"
-                placeholder="Mario Rossi"
-            />
-            <label>Email Address</label>
-            <input
-                required
-                v-model="email"
-                type="text"
-                placeholder="ciao@ciao.it"
-            />
-            <label>Password</label>
-            <input
-                required
-                v-model="password"
-                type="password"
-                placeholder="Password"
-            />
-            <label>Confirm Password</label>
-            <input
-                required
-                v-model="password_confirmation"
-                type="password"
-                placeholder="Repeat your password"
-            />
-            <hr />
-            <button type="submit">Setup</button>
-        </form>
-    </div>
+    <b-row align-v="center" align-h="center">
+        <b-col sm="12" md="8" lg="6" style="max-width:50rem">
+            <b-card>
+                <b-form @submit.prevent="setup">
+                    <b-form-group
+                        id="input-group-1"
+                        label="Name:"
+                        label-for="input-1"
+                    >
+                        <b-form-input
+                            id="input-1"
+                            v-model="name"
+                            type="text"
+                            placeholder="Enter name and surname"
+                            required
+                        ></b-form-input>
+                    </b-form-group>
+                    <b-form-group
+                        id="input-group-2"
+                        label="Email address:"
+                        label-for="input-1"
+                    >
+                        <b-form-input
+                            id="input-2"
+                            v-model="email"
+                            type="email"
+                            placeholder="Enter email"
+                            required
+                        ></b-form-input>
+                    </b-form-group>
+
+                    <b-form-group
+                        id="input-group-3"
+                        label="Password:"
+                        label-for="input-2"
+                    >
+                        <b-form-input
+                            id="input-3"
+                            type="password"
+                            v-model="password"
+                            placeholder="Password"
+                            required
+                        ></b-form-input>
+                    </b-form-group>
+
+                    <b-form-group
+                        id="input-group-4"
+                        label="Confirm Password:"
+                        label-for="input-2"
+                    >
+                        <b-form-input
+                            id="input-4"
+                            type="password"
+                            v-model="password_confirmation"
+                            placeholder="Repeat your password"
+                            required
+                        ></b-form-input>
+                    </b-form-group>
+
+                    <b-button type="submit" variant="primary" class="mt-3"
+                        >Signup</b-button
+                    >
+                </b-form>
+            </b-card>
+        </b-col>
+    </b-row>
 </template>
 
 <script>
@@ -44,7 +75,7 @@ export default {
     /*     created: function isInstalled() {
         this.$store.dispatch(IS_SETUP);
     }, */
-    name: "Login",
+    name: "Setup",
     data() {
         return {
             name: "",
@@ -54,7 +85,7 @@ export default {
         };
     },
     methods: {
-        login: function() {
+        setup: function() {
             const { name, email, password, password_confirmation } = this;
             this.$store
                 .dispatch(AUTH_SETUP, {

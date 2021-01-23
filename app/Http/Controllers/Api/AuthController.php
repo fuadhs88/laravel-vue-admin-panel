@@ -185,8 +185,8 @@ class AuthController extends Controller
     public function isInstalled()
     {
         if (!file_exists(storage_path('installed.json'))) {
-            return response()->json(["isInstalled" => "false"]);
+            return response()->json(["isInstalled" => false]);
         }
-        return response()->json(["isInstalled" => "true"]);
+        return response()->json(["isInstalled" => true]);
     }
 }

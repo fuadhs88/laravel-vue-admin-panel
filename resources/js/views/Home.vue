@@ -6,6 +6,9 @@
 export default {
     methods: {},
     name: "Home",
+    mounted: function() {
+        this.$router.push("/users");
+    },
     data() {
         return { name: "" };
     }

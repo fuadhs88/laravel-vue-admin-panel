@@ -1,14 +1,20 @@
 <template>
     <b-row align-v="center" align-h="center">
         <b-col sm="12" md="8" lg="6" style="max-width:50rem">
-            <b-alert
-                v-if="authStatus && error"
-                show
-                variant="warning"
-                dismissible
-            >
-                {{ error }}
-            </b-alert>
+            <div v-if="errors || error">
+                <b-alert
+                    show
+                    variant="danger"
+                    dismissible
+                    v-for="error in errors"
+                    :key="error[0]"
+                >
+                    {{ error[0] }}
+                </b-alert>
+                <b-alert v-if="error" show variant="danger" dismissible>
+                    {{ error }}
+                </b-alert>
+            </div>
             <b-card>
                 <b-form @submit.prevent="login">
                     <b-form-group
@@ -66,7 +72,8 @@ export default {
             email: "",
             password: "",
             remember_me: false,
-            error: false
+            error: false,
+            errors: false
         };
     },
     methods: {
@@ -74,16 +81,26 @@ export default {
             const { email, password, remember_me } = this;
             this.$store
                 .dispatch(AUTH_REQUEST, { email, password, remember_me })
-                .then(() => {
-                    this.$router.push("/");
-                })
-                .catch(e => {
-                    this.$set(
-                        this,
-                        ["error"],
-                        "Incorrect email or password, please check again"
-                    );
-                });
+                .then(
+                    resp => {
+                        this.$router.push("/");
+                    },
+                    error => {
+                        if (error.response.data.errors) {
+                            this.$set(
+                                this,
+                                ["errors"],
+                                error.response.data.errors
+                            );
+                        } else {
+                            this.$set(
+                                this,
+                                ["error"],
+                                error.response.data.message
+                            );
+                        }
+                    }
+                );
         }
     },
     computed: {

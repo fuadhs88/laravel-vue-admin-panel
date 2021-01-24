@@ -22,7 +22,6 @@ const actions = {
         axios.defaults.headers.common["Authorization"] = userToken;
         axios({ url: "/api/account", method: "GET" })
             .then(resp => {
-                console.log(resp);
                 dispatch(USER_PERMISSIONS);
                 commit(USER_SUCCESS, resp);
             })
@@ -33,18 +32,20 @@ const actions = {
             });
     },
     [USER_PERMISSIONS]: ({ commit }) => {
-        console.log("hi");
-        const userToken = localStorage.getItem("user-token");
-        axios.defaults.headers.common["Authorization"] = userToken;
-        axios({ url: "/api/account/permissions", method: "GET" })
-            .then(resp => {
-                commit(USER_PERMISSIONS, resp);
-            })
-            .catch(() => {
-                commit(USER_ERROR);
-                // if resp is unauthorized, logout, to
-                //dispatch(AUTH_LOGOUT);
-            });
+        return new Promise((resolve, reject) => {
+            const userToken = localStorage.getItem("user-token");
+            axios.defaults.headers.common["Authorization"] = userToken;
+            axios({ url: "/api/account/permissions", method: "GET" })
+                .then(resp => {
+                    commit(USER_PERMISSIONS, resp);
+                    resolve(resp);
+                })
+                .catch(() => {
+                    commit(USER_ERROR);
+                    // if resp is unauthorized, logout, to
+                    //dispatch(AUTH_LOGOUT);
+                });
+        });
     }
 };
 

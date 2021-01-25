@@ -12,24 +12,15 @@ import {
     BUILD_USER_LOADING,
     BUILD_USER_SUCCESS,
     ALL_ROLES,
-    ALL_PERMISSIONS,
-    EDIT_USER,
-    DELETE_USER,
-    CREATE_ROLE,
-    CREATE_USER,
-    BUILD_ROLE,
-    EDIT_ROLE,
-    DELETE_ROLE
+    EDIT_USER
 } from "../actions/routes";
 import router from "../../router";
-import { reject } from "lodash";
 const state = {
     loaded: false,
     routes: [],
     table: [],
     user: [],
-    roles: [],
-    permissions: []
+    roles: []
 };
 
 const getAUser = (to, from, next) => {};
@@ -130,7 +121,7 @@ const actions = {
                 .then(resp => {
                     //console.log(resp);
                     commit(BUILD_USER, resp.data);
-                    resolve(resp);
+                    dispatch(ALL_ROLES);
                     commit(BUILD_USER_SUCCESS);
                 })
                 .catch(err => {
@@ -140,139 +131,28 @@ const actions = {
     },
     [ALL_ROLES]: ({ commit }) => {
         return new Promise(resolve => {
-            axios({ url: "/api/account/roles", method: "GET" }).then(resp => {
+            axios({ url: "/api/roles", method: "GET" }).then(resp => {
                 if (resp) {
                     let data = resp.data.filter(function(el) {
                         return el.role_name !== "Super Admin";
                     });
-                    //console.log(data);
                     commit(ALL_ROLES, data);
-                    resolve(data);
+                    resolve(resp);
                 }
             });
         });
     },
-    [ALL_PERMISSIONS]: ({ commit }) => {
-        return new Promise(resolve => {
-            axios({ url: "/api/account/permissions", method: "GET" }).then(
-                resp => {
-                    resolve(resp);
-                }
-            );
-        });
-    },
     [EDIT_USER]: ({ commit }, data) => {
-        //console.log(data);
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
             axios({
                 url: `/api/user/edit`,
                 data: data,
                 method: "PUT"
-            })
-                .then(resp => {
+            }).then(resp => {
+                if (resp) {
                     resolve(resp);
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
-    [EDIT_ROLE]: ({ commit }, data) => {
-        //console.log(data);
-        return new Promise((resolve, reject) => {
-            axios({
-                url: `/api/role/edit`,
-                data: data,
-                method: "PUT"
-            })
-                .then(resp => {
-                    resolve(resp);
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
-    [DELETE_USER]: ({ commit }, data) => {
-        return new Promise((resolve, reject) => {
-            axios({
-                url: `/api/user/delete/${data.id}`,
-                method: "DELETE"
-            })
-                .then(resp => {
-                    if (resp) {
-                        resolve(resp);
-                    }
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
-    [DELETE_ROLE]: ({ commit }, data) => {
-        return new Promise((resolve, reject) => {
-            axios({
-                url: `/api/role/delete/${data.id}`,
-                method: "DELETE"
-            })
-                .then(resp => {
-                    if (resp) {
-                        resolve(resp);
-                    }
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
-    [CREATE_ROLE]: ({ commit, dispatch }, data) => {
-        return new Promise((resolve, reject) => {
-            axios({
-                url: `/api/role/create`,
-                data: data,
-                method: "POST"
-            })
-                .then(resp => {
-                    if (resp) {
-                        resolve(resp);
-                    }
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
-    [BUILD_ROLE]: ({ commit }, id) => {
-        return new Promise((resolve, reject) => {
-            axios({
-                url: `/api/role/${id}`,
-                method: "GET"
-            })
-                .then(resp => {
-                    if (resp) {
-                        resolve(resp);
-                    }
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
-    [CREATE_USER]: ({ commit }, user) => {
-        return new Promise((resolve, reject) => {
-            axios({
-                url: `/api/user/create`,
-                data: user,
-                method: "POST"
-            })
-                .then(resp => {
-                    if (resp) {
-                        resolve(resp);
-                    }
-                })
-                .catch(error => {
-                    reject(error);
-                });
+                }
+            });
         });
     }
 };
@@ -295,9 +175,6 @@ const mutations = {
     },
     [ALL_ROLES]: (state, resp) => {
         state.roles = resp;
-    },
-    [ALL_PERMISSIONS]: (state, resp) => {
-        state.permissions = resp;
     }
 };
 

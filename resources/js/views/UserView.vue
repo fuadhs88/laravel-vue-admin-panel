@@ -1,37 +1,19 @@
 <template>
     <b-row align-v="center" align-h="center">
-        <b-col sm="12">
-            <div v-if="errors || error">
-                <b-alert
-                    show
-                    variant="danger"
-                    dismissible
-                    v-for="error in errors"
-                    :key="error[0]"
-                >
-                    {{ error[0] }}
-                </b-alert>
-                <b-alert v-if="error" show variant="danger" dismissible>
-                    {{ error }}
-                </b-alert>
-            </div>
-            <b-card v-if="loaded">
-                <div class="d-flex flex-row align-items-baseline">
-                    <div
-                        v-if="!nameEdit"
-                        class="pr-2 pb-2 d-flex flex-row align-items-baseline"
-                    >
-                        <b-card-title>{{ name }} </b-card-title>
-                        <div v-can="'user-edit'">
-                            <b-icon
-                                icon="pencil-fill"
-                                variant="secondary"
-                                @click="nameEdit = true"
-                                class="edit-user"
-                            ></b-icon>
-                        </div>
-                    </div>
-
+        <b-col sm="12" v-show="isLoaded">
+            <b-card>
+                <b-row no-gutters align-v="baseline">
+                    <b-card-title v-if="!nameEdit" class="pr-2">{{
+                        thisUser.name
+                    }}</b-card-title>
+                    <b-icon
+                        icon="pencil-fill"
+                        variant="secondary"
+                        @click="nameEdit = true"
+                        v-if="thisUser.id !== loggedUser.id && !nameEdit"
+                        v-can="'user-edit'"
+                        class="edit-user"
+                    ></b-icon>
                     <b-form
                         inline
                         @submit.prevent="editName"
@@ -40,7 +22,7 @@
                     >
                         <b-form-input
                             id="input-1"
-                            v-model="name"
+                            v-model="user.name"
                             type="text"
                             placeholder="Enter name and surname"
                             class="mr-2"
@@ -50,137 +32,111 @@
                             >Change name</b-button
                         >
                     </b-form>
-                </div>
-                <b-form-group align-v="baseline">
-                    <div class="d-flex flex-row align-items-baseline">
-                        <b-card-sub-title v-if="!roleEdit" class="pr-1">
-                            {{ role }}
-                        </b-card-sub-title>
-                        <div
-                            v-can="'user-edit'"
-                            v-if="id !== loggedUser.id && !roleEdit"
-                        >
-                            <b-icon
-                                icon="pencil-fill"
-                                variant="secondary"
-                                @click="roleEdit = true"
-                                class="edit-user"
-                            ></b-icon>
-                        </div>
-                    </div>
-                    <b-form
-                        inline
-                        v-if="roleEdit"
-                        @submit.prevent="editRole"
-                        v-can="'user-edit'"
-                        class="flex flex-row align-items-baseline"
-                    >
+                </b-row>
+                <b-row no-gutters align-v="baseline">
+                    <b-card-sub-title class="mb-2">
+                        {{ thisUser.role }}
+                    </b-card-sub-title>
+                    <b-form>
                         <b-form-select
-                            v-model="role"
-                            class=" mr-2"
-                            :disabled="id == loggedUser.id"
+                            v-model="selectedRole"
+                            v-can="'user-edit'"
+                            class="mb-2"
                         >
                             <b-form-select-option
-                                v-for="newRole in roles"
-                                :key="newRole.id"
-                                :first="newRole.role_name == role"
-                                :value="newRole.role_name"
-                                @click.prevent="editRole"
+                                v-for="role in roles"
+                                :key="role.id"
+                                :value="role.role_name"
+                                :default="role.role_name == thisUser.role"
+                                :disabled="
+                                    thisUser.role == loggedUser.role ||
+                                        role.role_name == thisUser.role
+                                "
+                                @click="editRole"
                             >
-                                {{ newRole.role_name }}
+                                {{ role.role_name }}
                             </b-form-select-option>
                         </b-form-select>
-                        <b-button type="submit" variant="primary"
-                            >Change role</b-button
-                        >
                     </b-form>
-                </b-form-group>
-                <b-form-group
-                    ><strong>User created on:</strong>
-                    {{ created_at | formatDate }}</b-form-group
-                >
-
-                <div class=" d-flex flex-row align-items-baseline">
-                    <strong class="pr-1">Email address:</strong>
-                    <p v-if="!emailEdit" class="pr-2">
-                        {{ email }}
-                    </p>
-                    <b-form
-                        inline
-                        @submit.prevent="editMail"
-                        v-if="emailEdit"
-                        class="mb-3"
-                    >
-                        <b-form-input
-                            id="input-1"
-                            v-model="email"
-                            type="text"
-                            placeholder="Enter new email address"
-                            class="mr-2"
-                            required
-                        ></b-form-input>
-                        <b-button type="submit" variant="primary"
-                            >Change email</b-button
+                </b-row>
+                <b-list-group flush class="px-0">
+                    <b-list-group-item class="px-0">
+                        <strong>User created on:</strong>
+                        {{ thisUser.created_at | formatDate }}
+                    </b-list-group-item>
+                    <b-list-group-item class="px-0 d-flex flex-row">
+                        <strong class="pr-2">Email address:</strong>
+                        <p v-if="!emailEdit" class="pr-2">
+                            {{ user.email ? user.email : thisUser.email }}
+                        </p>
+                        <b-form
+                            inline
+                            @submit.prevent="editMail"
+                            v-if="emailEdit"
+                            class="mb-3"
                         >
-                    </b-form>
-                    <div
-                        v-can="'user-edit'"
-                        v-if="id !== loggedUser.id && !emailEdit"
-                    >
+                            <b-form-input
+                                id="input-1"
+                                v-model="user.email"
+                                type="text"
+                                placeholder="Enter new email address"
+                                class="mr-2"
+                                required
+                            ></b-form-input>
+                            <b-button type="submit" variant="primary"
+                                >Change email</b-button
+                            >
+                        </b-form>
                         <b-icon
                             icon="pencil-fill"
                             variant="secondary"
                             @click="emailEdit = true"
+                            v-if="thisUser.id !== loggedUser.id && !emailEdit"
+                            v-can="'user-edit'"
                             class="edit-user"
                         ></b-icon>
-                    </div>
-                </div>
-                <b-form-group class="px-0">
-                    <strong>Role permissions:</strong>
-                    <b-badge
-                        variant="success"
-                        class="mr-2"
-                        v-for="permission in permissions"
-                        :key="permission.id"
-                        >{{ permission.name }}</b-badge
-                    >
-                </b-form-group>
-                <b-form-group class="px-0" v-can="'user-edit'">
-                    <b-form inline @submit.prevent="editPassword">
-                        <b-form-input
-                            id="input-2"
-                            v-model="password"
-                            type="password"
-                            placeholder="Enter new password"
+                    </b-list-group-item>
+                    <b-list-group-item class="px-0">
+                        <strong>{{ thisUser.role }} permissions:</strong>
+                        <b-badge
+                            variant="success"
                             class="mr-2"
-                        ></b-form-input>
-                        <b-button type="submit" variant="primary" class=""
-                            >Change</b-button
+                            v-for="permission in thisUser.permissions"
+                            :key="permission.id"
+                            >{{ permission.name }}</b-badge
                         >
-                    </b-form>
-                </b-form-group>
-                <b-form-group class="px-0" v-can="'user-delete'">
+                    </b-list-group-item>
+                    <b-list-group-item class="px-0" v-can="'user-edit'">
+                        <b-form inline @submit.prevent="editPassword">
+                            <b-form-input
+                                id="input-2"
+                                v-model="user.password"
+                                type="password"
+                                placeholder="Enter new password"
+                                class="mr-2"
+                            ></b-form-input>
+                            <b-button type="submit" variant="primary" class=""
+                                >Change</b-button
+                            >
+                        </b-form>
+                    </b-list-group-item>
                     <b-form inline @submit.prevent="deleteUser">
                         <b-button
-                            v-if="role !== 'Super Admin'"
+                            v-if="thisUser.role !== 'Super Admin'"
+                            v-can="'user-delete'"
                             type="submit"
                             variant="danger"
                             class="mt-2"
                             >Delete user</b-button
                         ></b-form
                     >
-                </b-form-group>
+                </b-list-group>
             </b-card>
         </b-col>
     </b-row>
 </template>
 <script>
-import {
-    BUILD_USER,
-    EDIT_USER,
-    DELETE_USER,
-    ALL_ROLES
-} from "../store/actions/routes";
+import { BUILD_USER, EDIT_USER } from "../store/actions/routes";
 import { mapState, mapGetters } from "vuex";
 import { BIcon, BIconPencilFill } from "bootstrap-vue";
 export default {
@@ -191,128 +147,66 @@ export default {
     },
     data() {
         return {
-            loaded: false,
-            error: false,
-            errors: false,
+            error: null,
+            selectedRole: null,
             nameEdit: false,
             emailEdit: false,
-            roleEdit: false,
-            name: "",
-            oName: "",
-            email: "",
-            oEmail: "",
-            created_at: "",
-            newRole: "",
-            role: "",
-            oRole: "",
-            password: "",
-            roles: [],
-            permissions: []
+            user: {
+                name: "",
+                email: "",
+                role: "",
+                password: ""
+            }
         };
     },
     props: ["id"],
     beforeMount() {
-        this.$store
-            .dispatch(BUILD_USER, this.id)
-            .then(resp => {
-                this.name = resp.data.name;
-                this.email = resp.data.email;
-                this.role = resp.data.role;
-                this.created_at = resp.data.created_at;
-                this.permissions = resp.data.permissions;
-                this.oName = resp.data.name;
-                this.oEmail = resp.data.email;
-                this.oRole = resp.data.role;
-            })
-            .catch(() => {
-                this.$router.push("/users");
-            });
-        this.$store.dispatch(ALL_ROLES).then(resp => {
-            this.roles = resp;
-            this.loaded = true;
-        });
+        this.$store.dispatch(BUILD_USER, this.id);
+    },
+    mounted: function() {
+        this.$set(this.user, ["name"], this.thisUser.name);
+        this.$set(this, ["selectedRole"], this.thisUser.role);
     },
     computed: {
         ...mapState({
-            loggedUser: state => state.user.profile
-        })
+            loggedUser: state => state.user.profile,
+            thisUser: state => state.routes.user,
+            roles: state => state.routes.roles
+        }),
+        ...mapGetters(["isLoaded"], ["allRoles"]),
+        setStuff: function() {
+            this.$set(this.user, ["name"], this.thisUser.name);
+            this.$set(this, ["selectedRole"], this.thisUser.role);
+        }
     },
     methods: {
         editName: function() {
             this.$set(this, ["nameEdit"], false);
-            const { id, name } = this;
-            this.$store.dispatch(EDIT_USER, { id, name }).then(
-                resp => {},
-                error => {
-                    this.$set(this, ["name"], this.oName);
-                    if (error.response.data.errors) {
-                        this.$set(this, ["errors"], error.response.data.errors);
-                    } else {
-                        this.$set(this, ["error"], error.response.data.message);
-                    }
-                }
-            );
+            const { id } = this;
+            this.$store
+                .dispatch(EDIT_USER, { id, name: this.user.name })
+                .catch(e => {
+                    this.$set(this.user, ["name"], this.thisUser.name);
+                    this.$set(this, ["error"], "Invalid name change request");
+                });
         },
         editRole: function() {
-            const { id, role } = this;
-            this.$store.dispatch(EDIT_USER, { id, role }).then(
-                resp => {
-                    this.$set(this, ["roleEdit"], false);
-                },
-                error => {
-                    this.$set(this, ["role"], this.oRole);
-                    this.$set(this, ["roleEdit"], false);
-
-                    if (error.response.data.errors) {
-                        this.$set(this, ["errors"], error.response.data.errors);
-                    } else {
-                        this.$set(this, ["error"], error.response.data.message);
-                    }
-                }
-            );
+            const { id } = this;
+            this.$store
+                .dispatch(EDIT_USER, { id, role: this.selectedRole })
+                .catch(e => {
+                    this.$set(this.user, ["role", this.selectedRole]);
+                    this.$set(this, ["error"], "Invalid role change request");
+                });
         },
         editMail: function() {
-            this.$set(this, ["emailEdit"], false);
-            const { id, email } = this;
-            this.$store.dispatch(EDIT_USER, { id, email }).then(
-                resp => {},
-                error => {
-                    this.$set(this, ["email"], this.oEmail);
-                    if (error.response.data.errors) {
-                        this.$set(this, ["errors"], error.response.data.errors);
-                    } else {
-                        this.$set(this, ["error"], error.response.data.message);
-                    }
-                }
-            );
-        },
-        editPassword: function() {
-            const { id, password } = this;
-            this.$store.dispatch(EDIT_USER, { id, password }).then(
-                resp => {},
-                error => {
-                    if (error.response.data.errors) {
-                        this.$set(this, ["errors"], error.response.data.errors);
-                    } else {
-                        this.$set(this, ["error"], error.response.data.message);
-                    }
-                }
-            );
-        },
-        deleteUser: function() {
             const { id } = this;
-            this.$store.dispatch(DELETE_USER, { id }).then(
-                resp => {
-                    this.$router.push("/users");
-                },
-                error => {
-                    if (error.response.data.errors) {
-                        this.$set(this, ["errors"], error.response.data.errors);
-                    } else {
-                        this.$set(this, ["error"], error.response.data.message);
-                    }
-                }
-            );
+            this.$store
+                .dispatch(EDIT_USER, { id, name: this.user.email })
+                .catch(e => {
+                    this.$set(this.user, ["email", this.thisUser.email]);
+                    this.$set(this, ["error"], "Invalid email change request");
+                });
         }
     }
 };

@@ -63,8 +63,6 @@ Route::group(
     }
 );
 
-Route::name('roles')->get('account/roles', 'Api\IndexController@getAllRoles');
-
 Route::middleware(["auth:api"])->get('account/permissions', 'Api\AuthController@getAllPermissionsAttribute');
 
 Route::group(
@@ -87,6 +85,6 @@ Route::group(
     function () {
         Route::middleware(["can:role-create"])->post('create', 'Api\RoleController@createRole');
         Route::middleware(["can:role-edit"])->put('edit', 'Api\RoleController@editRole');
-        Route::middleware(["can:role-delete"])->delete('delete/{id}', 'Api\RoleController@deleteRole');
+        Route::middleware(["can:role-delete"])->delete('delete', 'Api\RoleController@deleteRole');
     }
 );

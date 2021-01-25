@@ -51,7 +51,7 @@ class RoleController extends Controller
         };
         return response()->json([
             'message' => 'A role with this name already exists!'
-        ], 409);
+        ], 402);
     }
 
     public function deleteRole(Request $request, Int $id)

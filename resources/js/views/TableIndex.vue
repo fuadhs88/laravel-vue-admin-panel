@@ -2,13 +2,7 @@
     <b-row align-v="center" align-h="center">
         <b-col sm="12">
             <b-card no-body :header="currentRouteName">
-                <b-table
-                    striped
-                    hover
-                    :fields="fields"
-                    :items="tableRows"
-                    class="mb-0"
-                >
+                <b-table striped hover :fields="fields" :items="tableRows">
                     <template #cell(user_name)="data">
                         <b-link :to="`/${name}/${data.item.id}`">
                             {{ data.value }}</b-link
@@ -32,28 +26,6 @@
                         >
                     </template>
                 </b-table>
-                <b-form>
-                    <b-button
-                        id="show-btn"
-                        v-if="currentRouteName == 'Users'"
-                        v-can="'user-create'"
-                        to="/user/create"
-                        variant="primary"
-                        class="my-2 ml-2"
-                    >
-                        Create a new user
-                    </b-button>
-                    <b-button
-                        id="show-btn"
-                        v-if="currentRouteName == 'Roles'"
-                        v-can="'role-create'"
-                        to="/role/create"
-                        variant="primary"
-                        class="my-2 ml-2"
-                    >
-                        Create a new role
-                    </b-button>
-                </b-form>
             </b-card>
         </b-col>
     </b-row>
@@ -128,14 +100,6 @@ export default {
         ...mapState({
             tableRows: state => state.routes.table
         })
-    },
-    methods: {
-        roleCreate: () => {
-            return true;
-        },
-        userCreate: () => {
-            return true;
-        }
         /*         tableHeaders() {
             return Object.keys(this.tableData[0]).map((header, index) => {
                 return {

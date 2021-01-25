@@ -20,7 +20,7 @@ export default {
         Navbar,
         Sidebar
     },
-    beforeCreate: function() {
+    created: function() {
         if (this.$store.getters.isAuthenticated) {
             this.$store
                 .dispatch(USER_REQUEST)

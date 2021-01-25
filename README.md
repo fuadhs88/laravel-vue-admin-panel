@@ -12,7 +12,7 @@
 -   `php artisan migrate:fresh --seed --seeder=PermissionSeeder`
 -   `php artisan passport:install --force`
 -   `php artisan serve`
--   `npm run watch` or `npm run prod`
+-   `npm run dev` or `npm run prod`
 -   `php artisan queue:work`
 
 Per resettare:

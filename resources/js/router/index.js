@@ -73,7 +73,7 @@ export default new Router({
         {
             path: "/",
             name: "Home",
-            component: Home,
+            component: Account,
             beforeEnter: ifAuthenticated
         },
         {
@@ -93,12 +93,6 @@ export default new Router({
             name: "Setup",
             component: Setup,
             beforeEnter: multiguard([ifNotAuthenticated, ifNotInstalled])
-        },
-        {
-            path: "/account",
-            name: "Account",
-            component: Account,
-            beforeEnter: ifAuthenticated
         },
         {
             path: "/role/create",

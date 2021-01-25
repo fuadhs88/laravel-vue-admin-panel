@@ -1,7 +1,7 @@
 <template>
     <b-row align-v="center" align-h="center">
         <b-col>
-            <div v-if="errors || error">
+            <div v-if="errors || error || roleError">
                 <b-alert
                     show
                     variant="danger"
@@ -11,8 +11,13 @@
                 >
                     {{ error[0] }}
                 </b-alert>
-                <b-alert v-if="error" show variant="danger" dismissible>
-                    {{ error }}
+                <b-alert
+                    v-if="error || roleError"
+                    show
+                    variant="danger"
+                    dismissible
+                >
+                    {{ error ? error : roleError }}
                 </b-alert>
             </div>
 
@@ -41,6 +46,7 @@
                             v-model="role"
                             v-can="'user-edit'"
                             class="mb-2"
+                            :disabled="error"
                         >
                             <b-form-select-option
                                 v-for="role in roles"
@@ -78,7 +84,11 @@
                             required
                         ></b-form-input>
                     </b-form-group>
-                    <b-button type="submit" variant="primary" class="mt-3"
+                    <b-button
+                        type="submit"
+                        variant="primary"
+                        class="mt-3"
+                        :disabled="roleError"
                         >Create User</b-button
                     >
                 </b-form>
@@ -107,7 +117,12 @@ export default {
             });
         this.$store.dispatch(ALL_ROLES).then(resp => {
             this.roles = resp;
-            this.role = resp[0].role_name;
+            try {
+                this.role = resp[0].role_name;
+            } catch (e) {
+                this.roleError =
+                    "No roles available, first create a role for your users";
+            }
         });
         this.loaded = true;
     },
@@ -116,6 +131,7 @@ export default {
             loaded: false,
             error: false,
             errors: false,
+            roleError: false,
             name: "",
             email: "",
             role: "",

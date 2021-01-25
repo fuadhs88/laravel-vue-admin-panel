@@ -39,10 +39,10 @@ const actions = {
                     dispatch(ROUTE_REQUEST);
                     resolve(token);
                 })
-                .catch(error => {
-                    commit(AUTH_ERROR, error);
+                .catch(err => {
+                    commit(AUTH_ERROR, err);
                     localStorage.removeItem("user-token");
-                    reject(error);
+                    reject(err);
                 });
         });
     },

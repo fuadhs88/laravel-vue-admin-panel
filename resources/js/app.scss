@@ -1,0 +1,39 @@
+@import "node_modules/bootstrap/scss/bootstrap.scss";
+@import "node_modules/bootstrap-vue/src/index.scss";
+@import "vue-bootstrap-sidebar-default.scss";
+@import "node_modules/bootstrap-vue/src/icons.scss";
+html {
+    min-height: 100%;
+}
+
+.container-fluid {
+    width: auto;
+}
+
+body {
+    min-height: 100vh;
+}
+
+.navbar {
+    min-height: 3.5rem;
+}
+
+.vue-bootstrap-sidebar {
+    padding-top: 3.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff;
+}
+
+.list-group-item:last-child {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.edit-user {
+    cursor: pointer;
+    &:hover {
+        color: $base-color !important;
+    }
+}

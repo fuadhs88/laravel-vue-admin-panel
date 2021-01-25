@@ -1,0 +1,39 @@
+@import "./vue-bootstrap-sidebar.scss";
+@import "./variables.scss";
+
+.default-theme {
+    background: $bg-color;
+    color: $color;
+    cursor: default;
+
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.19);
+
+    & .sidebar-header {
+        background-color: $bg-color;
+        color: $color;
+    }
+
+    .items-wrapper {
+        background-color: $bg-color;
+    }
+
+    .sidebar-button {
+        background-color: $transparent-background;
+        color: $color;
+        border: none;
+        border-radius: 0;
+        opacity: 1;
+        box-shadow: none;
+        margin-left: 10px;
+
+        &:hover,
+        &:focus,
+        &:active,
+        &:visited {
+            color: $color;
+            border: none;
+            border-color: none;
+            box-shadow: none;
+        }
+    }
+}

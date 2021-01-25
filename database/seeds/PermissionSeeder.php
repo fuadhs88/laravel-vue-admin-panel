@@ -16,6 +16,24 @@ class PermissionSeeder extends Seeder
     {
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        $role1 = Role::create(['name' => 'Super Admin']);
+        $permissions = [
+            'user-create',
+            'user-edit',
+            'user-delete',
+            'role-list',
+            'role-create',
+            'role-edit',
+            'role-delete',
+            'perm-list'
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::create(['name' => $permission]);
+        }
+
+        $role = Role::create(['name' => 'Super Admin']);
+
+        $permissions = Permission::pluck('id', 'id')->all();
+        $role->syncPermissions($permissions);
     }
 }

@@ -21,7 +21,10 @@ class FirstrunMiddleware
     {
 
         $route = $request->route()->getActionMethod() == "register" || $request->route()->getActionMethod() == "showRegistrationForm";
-        if (!file_exists(storage_path('installed.json')) and $route == 0) {
+        if (file_exists(storage_path('installed.json'))) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Forbidden.'], 403);
+            }
             return redirect()->route('register');
         }
         return $next($request);

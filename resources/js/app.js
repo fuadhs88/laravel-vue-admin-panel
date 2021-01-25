@@ -1,44 +1,45 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
-
 require("./bootstrap");
 
 import Vue from "vue";
-import VueRouter from "vue-router";
-
-Vue.use(VueRouter);
-
+import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue";
+//import VueRouter from "vue-router";
 import App from "./views/App";
-import Home from "./views/Home";
-import About from "./views/About";
+import router from "./router";
+import store from "./store";
+//import "bootstrap/dist/css/bootstrap.css";
+//import "bootstrap-vue/dist/bootstrap-vue.css";
+//import "../../public/css/app.css";
+import "./app.scss";
+import moment from "moment";
+import { mapState } from "vuex";
 
-const routes = [
-    {
-        path: "/",
-        name: "home",
-        component: Home
-    },
-    {
-        path: "/about",
-        name: "about",
-        component: About
-    },
-    {
-        path: "/register",
-        name: "register"
+Vue.use(BootstrapVue, BootstrapVueIcons);
+
+Vue.directive("can", function(el, binding, vnode) {
+    const store = vnode.context.$store;
+    let permissions = store.state.user.permissions;
+    if (permissions.indexOf(binding.value) !== -1) {
+        return (vnode.elm.hidden = false);
+    } else {
+        return (vnode.elm.hidden = true);
     }
-];
-
-const router = new VueRouter({
-    routes: routes,
-    mode: "history"
 });
 
-const app = new Vue({
+Vue.filter("formatDate", function(value) {
+    if (value) {
+        return moment(String(value)).format("DD/MM/YYYY hh:mm");
+    }
+});
+
+new Vue({
     el: "#app",
+    router,
+    store,
+    template: "<App/>",
     components: { App },
-    router
+    computed: {
+        ...mapState({
+            permissions: state => state.user.permissions
+        })
+    }
 });

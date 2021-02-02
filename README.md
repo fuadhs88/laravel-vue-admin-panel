@@ -1,4 +1,4 @@
-User, roles and permissions CRUD with Laravel, MySQL, Vue, using laravel-permissions, vuex, vue-router
+User, roles and permissions CRUD with Laravel, MySQL, Vue, using laravel passport, laravel-permissions, vuex, vue-router
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/aff1424de760839b69ec)
 
